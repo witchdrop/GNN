@@ -34,17 +34,17 @@ def reactivate(h,weights,b):
 
 def train(x_train,weights,hid_bias,vis_bias,epochs,dataset_size):
     for e in range(epochs):
+        print(f"epoch: {e+1}/{epochs}")
         v0 = x_train[:dataset_size]
         h0 = activate(v0,weights,hid_bias)
         v1 = reactivate(h0,weights,vis_bias)
         h1 = activate(v1,weights,vis_bias)
-        for i,data in enumerate(v0): #Gewicht anpassen pro Datensatz
-            print(f"epoch: {e+1}/{epochs} | data: {i+1}/{len(v0)}")
+        for i,data in enumerate(v0): #Gewicht, biase anpassen pro Datensatz
             delta = np.outer(v0[i],h0[i]) - np.outer(v1[i],h1[i])
             weights += learningRate * delta
-        vis_bias = learningRate * (v0-v1)
-        hid_bias = learningRate * (h0-h1)
-    return weights
+            vis_bias += learningRate * (v0[i]-v1[i])
+            hid_bias += learningRate * (h0[i]-h1[i])
+    return weights, hid_bias, vis_bias
 
 
 def test(x_test,weights,hid_bias,vis_bias,dataset_size):
@@ -84,6 +84,6 @@ num_pictures = 10
 dataset_size = 25
 x_train, x_test = setup()
 
-weights_trained = train(x_train,weights,hid_bias,vis_bias,epochs,dataset_size)
+weights_trained, hid_bias, vis_bias = train(x_train,weights,hid_bias,vis_bias,epochs,dataset_size)
 output = test(x_train,weights_trained,hid_bias,vis_bias,dataset_size)
 plot(num_pictures,x_train,output)
